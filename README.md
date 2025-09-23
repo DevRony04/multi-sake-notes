@@ -1,73 +1,121 @@
-# Welcome to your Lovable project
+# Multi-Tenant SaaS Notes (Vercel)
 
-## Project info
+A minimal multi-tenant notes application with JWT auth, role-based access, subscription gating, tenant isolation, and a Vite + React frontend. Backend runs as serverless functions on Vercel under `api/`.
 
-**URL**: https://lovable.dev/projects/4cadd9d0-4b72-4f9a-ae0e-74b5c1c6b1a5
+## Features
 
-## How can I edit this code?
+- Multi-tenancy with strict tenant isolation (Acme, Globex)
+- JWT-based authentication
+- Roles: Admin (invite/upgrade), Member (CRUD notes only)
+- Subscription gating: Free (max 3 notes), Pro (unlimited)
+- Upgrade endpoint to switch a tenant to Pro instantly
+- Notes CRUD API with tenant isolation and role checks
+- Health endpoint and CORS enabled
+- Frontend: login, list/create/delete notes, upgrade prompt on Free limit
 
-There are several ways of editing your application.
+## Multi-tenancy approach
 
-**Use Lovable**
+- Chosen approach: shared schema with a `tenantSlug` foreign key on all tenant-owned entities.
+- In this reference implementation, we use an in-memory store in `api/_lib/store.js` keyed by `tenantSlug` to model the shared-schema approach. In a real database, each table would include a `tenant_id` column and all queries would be scoped by it.
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/4cadd9d0-4b72-4f9a-ae0e-74b5c1c6b1a5) and start prompting.
+## Predefined accounts (password: `password`)
 
-Changes made via Lovable will be committed automatically to this repo.
+- Admin, Acme: `admin@acme.test`
+- Member, Acme: `user@acme.test`
+- Admin, Globex: `admin@globex.test`
+- Member, Globex: `user@globex.test`
 
-**Use your preferred IDE**
+## Environment variables
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
+- `JWT_SECRET` (required for production; default dev value is used if unset)
+- `CORS_ORIGIN` (optional; defaults to `*`)
 
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
+## API overview
 
-Follow these steps:
+Base path when deployed on Vercel: `/api`
+
+- `GET /api/health` → `{ "status": "ok" }`
+- `POST /api/login` → body: `{ email, password }` → `{ token, user }`
+- `GET /api/notes` → list notes for current tenant
+- `POST /api/notes` → create note; Free plan enforced
+  - body: `{ title, content }`
+- `GET /api/notes?id=:id` → get note by id
+- `PUT /api/notes?id=:id` → update note by id
+- `DELETE /api/notes?id=:id` → delete note by id
+- `POST /api/tenants/:slug/upgrade` → admin-only, upgrades to Pro
+
+Auth header: `Authorization: Bearer <JWT>` for all endpoints except `/api/health` and `/api/login`.
+
+### Example requests
+
+```bash
+# Health
+curl -s https://<your-vercel-deployment>/api/health
+
+# Login (use any predefined account, password: password)
+curl -s -X POST https://<your-vercel-deployment>/api/login \
+  -H "Content-Type: application/json" \
+  -d '{"email":"admin@acme.test","password":"password"}'
+
+# List notes
+curl -s https://<your-vercel-deployment>/api/notes \
+  -H "Authorization: Bearer <JWT>"
+
+# Create note (Free plan limits to 3 notes)
+curl -s -X POST https://<your-vercel-deployment>/api/notes \
+  -H "Authorization: Bearer <JWT>" -H "Content-Type: application/json" \
+  -d '{"title":"Hello","content":"World"}'
+
+# Upgrade tenant to Pro (admin only)
+curl -s -X POST https://<your-vercel-deployment>/api/tenants/acme/upgrade \
+  -H "Authorization: Bearer <JWT>"
+```
+
+## Frontend
+
+- Tech: Vite, React, TypeScript, shadcn-ui, Tailwind CSS.
+- Supports: login, viewing notes, creating/deleting notes, and showing “Upgrade to Pro” when Free limit is reached.
+
+## Local development
+
+Requirements: Node 18+ and npm.
 
 ```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
-
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
-
-# Step 3: Install the necessary dependencies.
 npm i
-
-# Step 4: Start the development server with auto-reloading and an instant preview.
 npm run dev
 ```
 
-**Edit a file directly in GitHub**
+To run API locally with Vercel functions (recommended):
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+```sh
+# optional if you want unified frontend+API locally
+npm i -D vercel
+npx vercel dev
+```
 
-**Use GitHub Codespaces**
+Set environment variables in a `.env` or through your shell (for Vercel, use Project Settings → Environment Variables):
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+```sh
+JWT_SECRET=your-strong-secret
+CORS_ORIGIN=*
+```
 
-## What technologies are used for this project?
+## Deployment (Vercel)
 
-This project is built with:
+1. Push this repository to GitHub.
+2. Import the project in Vercel.
+3. Set `JWT_SECRET` (required) and optionally `CORS_ORIGIN` in Vercel Project Settings.
+4. Vercel will build the Vite app and deploy serverless functions from the `api/` directory.
+5. Verify:
+   - `GET /api/health` returns `{ "status": "ok" }`
+   - Login works for all predefined accounts
+   - Notes CRUD works and respects tenant isolation and Free plan limits
+   - Upgrading via `POST /api/tenants/:slug/upgrade` removes the note limit immediately
 
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
+## Notes on data isolation
 
-## How can I deploy this project?
+This demo uses an in-memory store to keep the project self-contained. For production:
 
-Simply open [Lovable](https://lovable.dev/projects/4cadd9d0-4b72-4f9a-ae0e-74b5c1c6b1a5) and click on Share -> Publish.
-
-## Can I connect a custom domain to my Lovable project?
-
-Yes, you can!
-
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
-
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/features/custom-domain#custom-domain)
+- Use a database (e.g., Postgres) with a `tenant_id` column on all tables.
+- Ensure every query includes a tenant scope (`WHERE tenant_id = $1`).
+- Optionally enforce row-level security policies per tenant.
