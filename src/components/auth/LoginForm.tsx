@@ -130,8 +130,8 @@ export const LoginForm: React.FC<LoginFormProps> = ({ onLogin, isLoading, error 
         </Card>
 
         {/* Footer */}
-        <div className="text-center text-sm text-foreground-muted">
-          Built with Lovable + Supabase
+        <div className="text-center text-sm text-foreground-muted text-blue-800">
+        ©.2025 Multi-Tenant-Sass -- All rights reserved.
         </div>
       </div>
     </div>
