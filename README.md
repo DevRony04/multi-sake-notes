@@ -1,4 +1,4 @@
-# Multi-Tenant SaaS Notes (Vercel)
+# Multi-Tenant SaaS Notes Application
 
 A minimal multi-tenant notes application with JWT auth, role-based access, subscription gating, tenant isolation, and a Vite + React frontend. Backend runs as serverless functions on Vercel under `api/`.
 
