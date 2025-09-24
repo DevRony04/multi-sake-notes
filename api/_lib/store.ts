@@ -1,6 +1,32 @@
-const crypto = require('crypto');
+import crypto from 'crypto';
 
-const TENANTS = {
+export type Plan = 'free' | 'pro';
+
+export interface Tenant {
+  id: string;
+  name: string;
+  slug: string;
+  plan: Plan;
+  notesLimit?: number;
+}
+
+export interface User {
+  id: string;
+  email: string;
+  role: 'admin' | 'member';
+  tenantSlug: string;
+}
+
+export interface Note {
+  id: string;
+  title: string;
+  content: string;
+  createdAt: string;
+  updatedAt: string;
+  author: { email: string };
+}
+
+export const TENANTS: Record<string, Tenant> = {
   acme: {
     id: 'acme',
     name: 'Acme Corporation',
@@ -16,7 +42,7 @@ const TENANTS = {
   },
 };
 
-const USERS = {
+export const USERS: Record<string, User> = {
   'admin@acme.test': {
     id: '1',
     email: 'admin@acme.test',
@@ -43,7 +69,7 @@ const USERS = {
   },
 };
 
-const NOTES = {
+export const NOTES: Record<string, Note[]> = {
   acme: [
     {
       id: '1',
@@ -77,32 +103,32 @@ const NOTES = {
   ],
 };
 
-function getTenantBySlug(slug) {
+export function getTenantBySlug(slug: string): Tenant | null {
   return TENANTS[slug] || null;
 }
 
-function getUserByEmail(email) {
+export function getUserByEmail(email: string): User | null {
   return USERS[email] || null;
 }
 
-function listNotes(tenantSlug) {
+export function listNotes(tenantSlug: string): Note[] {
   return NOTES[tenantSlug] ? [...NOTES[tenantSlug]] : [];
 }
 
-function createNote(tenantSlug, { title, content, authorEmail }) {
+export function createNote(tenantSlug: string, { title, content, authorEmail }: { title: string; content: string; authorEmail: string; }): Note {
   const id = crypto.randomUUID();
   const now = new Date().toISOString();
-  const newNote = { id, title, content, createdAt: now, updatedAt: now, author: { email: authorEmail } };
+  const newNote: Note = { id, title, content, createdAt: now, updatedAt: now, author: { email: authorEmail } };
   if (!NOTES[tenantSlug]) NOTES[tenantSlug] = [];
   NOTES[tenantSlug].push(newNote);
   return newNote;
 }
 
-function getNote(tenantSlug, id) {
+export function getNote(tenantSlug: string, id: string): Note | null {
   return (NOTES[tenantSlug] || []).find((n) => n.id === id) || null;
 }
 
-function updateNote(tenantSlug, id, { title, content }) {
+export function updateNote(tenantSlug: string, id: string, { title, content }: { title?: string; content?: string; }): Note | null {
   const note = getNote(tenantSlug, id);
   if (!note) return null;
   if (typeof title === 'string') note.title = title;
@@ -111,7 +137,7 @@ function updateNote(tenantSlug, id, { title, content }) {
   return note;
 }
 
-function deleteNote(tenantSlug, id) {
+export function deleteNote(tenantSlug: string, id: string): boolean {
   const list = NOTES[tenantSlug] || [];
   const idx = list.findIndex((n) => n.id === id);
   if (idx >= 0) {
@@ -121,34 +147,19 @@ function deleteNote(tenantSlug, id) {
   return false;
 }
 
-function getTenantStats(tenantSlug) {
+export function getTenantStats(tenantSlug: string): { notesCount: number; notesLimit?: number } {
   const tenant = getTenantBySlug(tenantSlug);
   const notesCount = (NOTES[tenantSlug] || []).length;
-  const notesLimit = tenant.plan === 'free' ? tenant.notesLimit || 3 : undefined;
+  const notesLimit = tenant && tenant.plan === 'free' ? tenant.notesLimit || 3 : undefined;
   return { notesCount, notesLimit };
 }
 
-function upgradeTenantToPro(slug) {
+export function upgradeTenantToPro(slug: string): Tenant | null {
   const tenant = getTenantBySlug(slug);
   if (!tenant) return null;
   tenant.plan = 'pro';
   delete tenant.notesLimit;
   return tenant;
 }
-
-module.exports = {
-  TENANTS,
-  USERS,
-  NOTES,
-  getTenantBySlug,
-  getUserByEmail,
-  listNotes,
-  createNote,
-  getNote,
-  updateNote,
-  deleteNote,
-  getTenantStats,
-  upgradeTenantToPro,
-};
 
 

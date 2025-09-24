@@ -1,4 +1,4 @@
-module.exports = (req, res) => {
+export default function handler(req: any, res: any) {
   res.setHeader('Content-Type', 'application/json');
   res.setHeader('Access-Control-Allow-Origin', process.env.CORS_ORIGIN || '*');
   if (req.method === 'OPTIONS') {
@@ -7,6 +7,7 @@ module.exports = (req, res) => {
     return res.status(200).end();
   }
   return res.status(200).json({ status: 'ok' });
-};
+}
 
+module.exports = handler;
 

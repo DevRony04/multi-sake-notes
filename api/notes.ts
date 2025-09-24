@@ -1,7 +1,7 @@
-const { listNotes, createNote, getNote, updateNote, deleteNote, getTenantStats } = require('./_lib/store');
-const { withCors, sendJson, method, requireAuth } = require('./_lib/http');
+import { listNotes, createNote, getNote, updateNote, deleteNote, getTenantStats } from './_lib/store';
+import { withCors, sendJson, method, requireAuth } from './_lib/http';
 
-module.exports = async (req, res) => {
+export default async function handler(req: any, res: any) {
   withCors(res);
   if (method(req) === 'OPTIONS') return res.status(200).end();
 
@@ -47,6 +47,7 @@ module.exports = async (req, res) => {
   } catch (e) {
     return sendJson(res, 500, { error: 'Internal Server Error' });
   }
-};
+}
 
+module.exports = handler;
 

@@ -1,0 +1,14 @@
+{
+  "functions": {
+    "api/**/*.[jt]s": {
+      "runtime": "nodejs20.x",
+      "memory": 128,
+      "maxDuration": 10
+    }
+  },
+  "rewrites": [
+    { "source": "/api/(.*)", "destination": "/api/$1" },
+    { "source": "/(.*)", "destination": "/index.html" }
+  ]
+}
+

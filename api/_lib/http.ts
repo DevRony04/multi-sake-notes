@@ -1,33 +1,32 @@
-const { verify } = require('./jwt');
-const { getTenantBySlug, getUserByEmail } = require('./store');
+import { verify } from './jwt';
+import { getTenantBySlug, getUserByEmail } from './store';
 
 const ALLOWED_ORIGIN = process.env.CORS_ORIGIN || '*';
 
-function withCors(res) {
+export function withCors(res: any) {
   res.setHeader('Access-Control-Allow-Origin', ALLOWED_ORIGIN);
   res.setHeader('Access-Control-Allow-Methods', 'GET,POST,PUT,DELETE,OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
 }
 
-function sendJson(res, status, body) {
+export function sendJson(res: any, status: number, body: unknown) {
   withCors(res);
   res.status(status).json(body);
 }
 
-function method(req) {
+export function method(req: any): string {
   return (req.method || 'GET').toUpperCase();
 }
 
-function parseAuth(req) {
-  const auth = req.headers['authorization'] || req.headers['Authorization'];
+export function parseAuth(req: any) {
+  const auth = req.headers?.['authorization'] || req.headers?.['Authorization'];
   if (!auth || typeof auth !== 'string') return null;
   const [scheme, token] = auth.split(' ');
   if (scheme !== 'Bearer' || !token) return null;
   try {
-    const payload = verify(token);
-    // normalize user and tenant
-    const user = getUserByEmail(payload.email);
-    const tenant = getTenantBySlug(payload.tenantSlug);
+    const payload = verify(token) as { email?: string; tenantSlug?: string };
+    const user = payload.email ? getUserByEmail(payload.email) : null;
+    const tenant = payload.tenantSlug ? getTenantBySlug(payload.tenantSlug) : null;
     if (!user || !tenant) return null;
     return { user, tenant, tokenPayload: payload };
   } catch (e) {
@@ -35,7 +34,7 @@ function parseAuth(req) {
   }
 }
 
-function requireAuth(req, res) {
+export function requireAuth(req: any, res: any) {
   const ctx = parseAuth(req);
   if (!ctx) {
     sendJson(res, 401, { error: 'Unauthorized' });
@@ -44,7 +43,7 @@ function requireAuth(req, res) {
   return ctx;
 }
 
-function requireAdmin(req, res) {
+export function requireAdmin(req: any, res: any) {
   const ctx = requireAuth(req, res);
   if (!ctx) return null;
   if (ctx.user.role !== 'admin') {
@@ -53,7 +52,5 @@ function requireAdmin(req, res) {
   }
   return ctx;
 }
-
-module.exports = { withCors, sendJson, method, parseAuth, requireAuth, requireAdmin };
 
 

@@ -1,8 +1,8 @@
-const { sign } = require('./_lib/jwt');
-const { getUserByEmail, getTenantBySlug, getTenantStats } = require('./_lib/store');
-const { withCors, sendJson, method } = require('./_lib/http');
+import { sign } from './_lib/jwt';
+import { getUserByEmail, getTenantBySlug, getTenantStats } from './_lib/store';
+import { withCors, sendJson, method } from './_lib/http';
 
-module.exports = async (req, res) => {
+export default async function handler(req: any, res: any) {
   withCors(res);
   if (method(req) === 'OPTIONS') return res.status(200).end();
   if (method(req) !== 'POST') return sendJson(res, 405, { error: 'Method Not Allowed' });
@@ -38,6 +38,7 @@ module.exports = async (req, res) => {
   } catch (e) {
     return sendJson(res, 500, { error: 'Internal Server Error' });
   }
-};
+}
 
+module.exports = handler;
 

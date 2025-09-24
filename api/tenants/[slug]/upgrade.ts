@@ -1,7 +1,7 @@
-const { upgradeTenantToPro, getTenantStats, getTenantBySlug } = require('../../_lib/store');
-const { withCors, sendJson, method, requireAdmin, parseAuth } = require('../../_lib/http');
+import { upgradeTenantToPro, getTenantStats } from '../../_lib/store';
+import { withCors, sendJson, method, requireAdmin } from '../../_lib/http';
 
-module.exports = async (req, res) => {
+export default async function handler(req: any, res: any) {
   withCors(res);
   if (method(req) === 'OPTIONS') return res.status(200).end();
   if (method(req) !== 'POST') return sendJson(res, 405, { error: 'Method Not Allowed' });
@@ -29,6 +29,7 @@ module.exports = async (req, res) => {
       notesLimit: stats.notesLimit,
     },
   });
-};
+}
 
+module.exports = handler;
 
