@@ -36,18 +36,18 @@ export const NoteCard: React.FC<NoteCardProps> = ({
   return (
     <Card className="card-interactive group">
       <CardHeader className="pb-3">
-        <div className="flex items-start justify-between">
+        <div className="flex items-start justify-between gap-2">
           <div className="flex-1 min-w-0">
-            <h3 className="font-semibold text-lg text-card-foreground truncate group-hover:text-primary transition-colors">
+            <h3 className="font-semibold text-base md:text-lg text-card-foreground truncate group-hover:text-primary transition-colors">
               {note.title}
             </h3>
-            <div className="flex items-center space-x-2 mt-1">
-              <Badge variant="outline" className="text-xs">
+            <div className="flex items-center gap-2 mt-1">
+              <Badge variant="outline" className="text-[10px] md:text-xs">
                 <Calendar className="w-3 h-3 mr-1" />
                 {timeAgo}
               </Badge>
               {note.author && (
-                <Badge variant="secondary" className="text-xs">
+                <Badge variant="secondary" className="text-[10px] md:text-xs">
                   {note.author.email}
                 </Badge>
               )}
@@ -58,8 +58,8 @@ export const NoteCard: React.FC<NoteCardProps> = ({
             <DropdownMenuTrigger asChild>
               <Button
                 variant="ghost"
-                size="sm"
-                className="opacity-0 group-hover:opacity-100 transition-opacity focus:opacity-100"
+                size="icon"
+                className="h-8 w-8 md:h-9 md:w-9 transition-opacity focus:opacity-100"
               >
                 <MoreVertical className="w-4 h-4" />
               </Button>

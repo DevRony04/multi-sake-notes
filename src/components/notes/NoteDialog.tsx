@@ -59,7 +59,7 @@ export const NoteDialog: React.FC<NoteDialogProps> = ({
 
   return (
     <Dialog open={isOpen} onOpenChange={handleClose}>
-      <DialogContent className="sm:max-w-[600px]">
+      <DialogContent className="sm:max-w-[600px] max-h-[85vh] overflow-auto">
         <DialogHeader>
           <DialogTitle>
             {mode === 'create' ? 'Create New Note' : 'Edit Note'}
@@ -95,11 +95,11 @@ export const NoteDialog: React.FC<NoteDialogProps> = ({
               onChange={(e) => setContent(e.target.value)}
               disabled={isLoading}
               rows={8}
-              className="focus-ring resize-none"
+              className="focus-ring resize-y min-h-[160px]"
             />
           </div>
 
-          <DialogFooter className="flex space-x-2">
+          <DialogFooter className="flex flex-col-reverse sm:flex-row gap-2 sm:space-x-2">
             <Button
               type="button"
               variant="outline"
