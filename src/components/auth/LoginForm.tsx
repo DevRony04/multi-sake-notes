@@ -131,7 +131,7 @@ export const LoginForm: React.FC<LoginFormProps> = ({ onLogin, isLoading, error 
 
         {/* Footer */}
         <div className="text-center text-sm text-foreground-muted text-blue-800">
-        ©.2025 Multi-Tenant-Sass -- All rights reserved.
+        ©.2025 Multi-Tenant-Saas -- All rights reserved.
         </div>
       </div>
     </div>
